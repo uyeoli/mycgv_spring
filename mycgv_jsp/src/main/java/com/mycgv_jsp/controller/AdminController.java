@@ -70,10 +70,7 @@ public class AdminController {
 		ModelAndView model = new ModelAndView();
 		NoticeDao noticeDao = new NoticeDao();
 		NoticeVo noticeVo = noticeDao.select(nid);
-		if (noticeVo != null) {
-			// 조회수 업데이트 - DB적용
-			noticeDao.updateHits(nid);
-		}
+
 
 		model.addObject("nvo", noticeVo);
 		model.setViewName("/admin/notice/admin_notice_content");
