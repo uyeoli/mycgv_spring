@@ -12,4 +12,6 @@ public class NoticeController {
 	 public String notice_list() { 
 		 return "/notice/notice_list"; 
 		 }
+	 
+	 
 }

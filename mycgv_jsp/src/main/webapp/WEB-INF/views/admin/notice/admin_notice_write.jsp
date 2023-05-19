@@ -6,6 +6,8 @@
 <meta charset="UTF-8">
 <title>MYCGV</title>
 <link rel="stylesheet" href="http://localhost:9000/mycgv_jsp/css/mycgv_jsp.css">
+<script src="http://localhost:9000/mycgv_jsp/js/jquery-3.6.4.min.js"></script>
+<script src="http://localhost:9000/mycgv_jsp/js/mycgv_jsp_jquery.js"></script>
 </head>
 <body>
 	<!-- header -->
@@ -17,7 +19,7 @@
 	<div class="content">
 		<section class="board">
 			<h1 class="title">관리자 - 공지사항</h1>
-			<form name="writeForm" action="#"  method="get">
+			<form name="writeForm" action="admin_notice_write_proc.do"  method="post">
 				<table border=1>
 					<tr>
 						<th>제목</th>
@@ -33,11 +35,11 @@
 					</tr>					
 					<tr>
 						<td colspan="2">
-							<button type="button">등록완료</button>
+							<button type="button" id = "btnNoticeWrite">등록완료</button>
 							<button type="reset">다시쓰기</button>
-							<a href="admin_notice_list.jsp">
+							<a href="admin_notice_list.do">
 								<button type="button">리스트</button></a>
-							<a href="http://localhost:9000/mycgv_jsp/admin/admin_index.jsp">
+							<a href="http://localhost:9000/mycgv_jsp/admin_index.do">
 								<button type="button">관리자홈</button></a>
 						</td>				
 					</tr>

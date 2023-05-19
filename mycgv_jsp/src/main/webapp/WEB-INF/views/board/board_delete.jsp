@@ -1,16 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import = "com.mycgv_jsp.vo.BoardVo" %>    
-<%@ page import = "com.mycgv_jsp.dao.BoardDao" %>    
 
-    
-<%
-	String bid = request.getParameter("bid");
-
-	BoardDao boardDao = new BoardDao();
-	
-	BoardVo boardVo = boardDao.select(bid);
-%>             
     
     
     
@@ -31,8 +21,8 @@
 	<div class="content">
 		<section class="board">
 			<h1 class="title">게시판</h1>
-			<form name="deleteForm" action="boardDeleteProc.jsp" method="post">
-				<input type = "hidden" name = "bid" value = "<%= bid %>">
+			<form name="deleteForm" action="board_delete_proc.do" method="post">
+				<input type = "hidden" name = "bid" value = "${bid}">
 				<table>
 					<tr>
 						<td><img src="http://localhost:9000/mycgv_jsp/images/trash.jpg"></td>
@@ -43,11 +33,11 @@
 					<tr>
 						<td colspan="2">
 							<button type="submit" class="btn_style" id = "btnBoardDelete">삭제완료</button>
-							<a href="board_content.jsp?bid=<%= boardVo.getBid() %>">
+							<a href="board_content.do?bid=${bid}">
 								<button type="button" class="btn_style">이전페이지</button></a>
-							<a href="board_list.jsp">
+							<a href="board_list.do">
 								<button type="button" class="btn_style">리스트</button></a>
-							<a href="http://localhost:9000/mycgv_jsp/index.jsp">
+							<a href="http://localhost:9000/mycgv_jsp/index.do">
 								<button type="button" class="btn_style">홈으로</button></a>
 						</td>				
 					</tr>

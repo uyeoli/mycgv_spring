@@ -121,4 +121,17 @@ public class BoardDao extends DBConn{
 		return result;
 	}
 	
+	/*
+	 * update - 조회수 카운트
+	 */
+	public void updateHits(String bid) {
+		String sql = "update mycgv_board set bhits = bhits + 1 where bid = ?";
+		getPreparedStatement(sql);
+		try {
+			pstmt.setString(1, bid);
+			pstmt.executeUpdate();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

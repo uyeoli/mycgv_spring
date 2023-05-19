@@ -14,7 +14,7 @@
 	<!-- header -->
 	<!-- <iframe src="http://localhost:9000/mycgv_jsp/header.jsp"
 			scrolling="no" width="100%" height="149px" frameborder=0></iframe> -->
-	<jsp:include page="/header.do"></jsp:include>
+	<jsp:include page="../header.jsp"></jsp:include>
 	
 	<!-- content -->
 	<div class="content">
@@ -23,7 +23,7 @@
 			<table class="board_list">
 				<tr>
 					<td colspan="5">
-						<a href="board_write.jsp">
+						<a href="board_write.do">
 							<button type="button" class="btn_style2">글쓰기</button>
 						</a>
 					</td>
