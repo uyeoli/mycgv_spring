@@ -6,6 +6,57 @@ import com.mycgv_jsp.vo.MemberVo;
 
 public class MemberDao extends DBConn{
 	
+	public ArrayList<MemberVo> select(int startCount, int endCount) {
+		ArrayList<MemberVo> list = new ArrayList<MemberVo>();
+		String sql = "select rno,id,name, mdate, grade\r\n" + 
+				" from (select rownum rno, id, name, to_char(mdate, 'yyyy-mm-dd') mdate, grade \r\n" + 
+				" from (select id, name, mdate, grade from mycgv_member order by mdate desc))\r\n" + 
+				" where rno between ? and ?";
+		getPreparedStatement(sql);
+		
+		try {
+			pstmt.setInt(1, startCount);
+			pstmt.setInt(2, endCount);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				MemberVo memberVo = new MemberVo();
+				memberVo.setRno(rs.getInt(1));
+				memberVo.setId(rs.getString(2));
+				memberVo.setName(rs.getString(3));
+				memberVo.setMdate(rs.getString(4));
+				memberVo.setGrade(rs.getString(5));
+				list.add(memberVo);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	
+	
+	
+	
+	
+	public int totalRowCount() {
+		int count = 0;
+		String sql = "select count(*) from mycgv_notice";
+		getPreparedStatement(sql);
+		
+		try {
+			rs = pstmt.executeQuery();
+			while(rs.next()) {				
+				count = rs.getInt(1);
+			}			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return count;		
+	}	
+	
+	
 	/* loginCheck - 로그인체크 */
 	public int loginCheck(MemberVo memberVo) {
 		int result = 0;

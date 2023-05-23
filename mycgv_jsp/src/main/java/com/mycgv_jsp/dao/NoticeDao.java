@@ -6,6 +6,43 @@ import com.mycgv_jsp.vo.NoticeVo;
 
 public class NoticeDao extends DBConn{
 	
+	/* 전체 리스트 */
+	public ArrayList<NoticeVo> select(int startCount, int endCount){
+		
+		ArrayList<NoticeVo> list = new ArrayList<NoticeVo>();
+		try{
+			//String sql = "SELECT ROWNUM RNO, NO, TITLE, to_char(NDATE,'yyyy-mm-dd'), HITS "
+			//			+ " FROM (SELECT * FROM CGV_NOTICE ORDER BY NDATE DESC)";
+			String sql = "select rno, nid, ntitle, ncontent, nhits, ndate\r\n" + 
+					"from (select rownum rno, nid, ntitle, ncontent, nhits, to_char(ndate, 'yyyy-mm-dd') ndate\r\n" + 
+					"          from (select nid, ntitle, ncontent, nhits, ndate from mycgv_notice order by ndate desc))\r\n" + 
+					"                where rno between ? and ?";
+			
+			getPreparedStatement(sql);
+			pstmt.setInt(1, startCount);
+			pstmt.setInt(2, endCount);
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()){
+				NoticeVo vo = new NoticeVo();
+				vo.setRno(rs.getInt(1));
+				vo.setNid(rs.getString(2));
+				vo.setNtitle(rs.getString(3));
+				vo.setNcontent(rs.getString(4));
+				vo.setNhits(rs.getInt(5));
+				vo.setNdate(rs.getString(5));
+				list.add(vo);
+			}
+			
+		}catch(Exception e){ 
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	
+	
+	
 	/*
 	 * SELECT - 공지사항 전체 리스트
 	 */
@@ -32,6 +69,25 @@ public class NoticeDao extends DBConn{
 		
 		return list;
 	}
+	
+	public int totalRowCount() {
+		int count = 0;
+		String sql = "select count(*) from mycgv_notice";
+		getPreparedStatement(sql);
+		
+		try {
+			rs = pstmt.executeQuery();
+			while(rs.next()) {				
+				count = rs.getInt(1);
+			}			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return count;		
+	}	
+	
 	
 	/*
 	 * 공지사항 글쓰기 처리

@@ -5,6 +5,61 @@ import java.util.ArrayList;
 import com.mycgv_jsp.vo.BoardVo;
 
 public class BoardDao extends DBConn{
+	
+	/* 전체 카운트 가져오기*/
+	public int totalRowCount() {
+			int count = 0;
+			String sql = "select count(*) from mycgv_board";
+			getPreparedStatement(sql);
+			
+			try {
+				rs = pstmt.executeQuery();
+				while(rs.next()) {				
+					count = rs.getInt(1);
+				}			
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return count;		
+		}	
+
+	/**
+	 * 페이징 처리 - startCount , endCount
+	 */
+	public ArrayList<BoardVo> select(int startCount, int endCount) {
+		ArrayList<BoardVo> list = new ArrayList<BoardVo>();
+		String sql = "SELECT RNO, BID, BTITLE, BCONTENT, BHITS, ID, BDATE" + 
+				" FROM (SELECT ROWNUM RNO, BID, BTITLE, BCONTENT, BHITS, ID, TO_CHAR(BDATE, 'YYYY-MM-DD') BDATE \r\n" + 
+				"            	FROM (SELECT BID, BTITLE, BCONTENT, BHITS, ID, BDATE FROM MYCGV_BOARD ORDER BY BDATE DESC))\r\n" + 
+				"                     WHERE RNO BETWEEN ? AND ? ";
+		getPreparedStatement(sql);
+		try {
+			pstmt.setInt(1, startCount);
+			pstmt.setInt(2, endCount);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				BoardVo boardVo = new BoardVo();
+				boardVo.setRno(rs.getInt(1));
+				boardVo.setBid(rs.getString(2));
+				boardVo.setBtitle(rs.getString(3));
+				boardVo.setBcontent(rs.getString(4));
+				boardVo.setBhits(rs.getInt(5));
+				boardVo.setId(rs.getString(6));
+				boardVo.setBdate(rs.getString(7));
+				list.add(boardVo);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return list;
+	}
+	
+	
+	
+	
 	/**
 	 * select - 게시글 전체 리스트 
 	 */

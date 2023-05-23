@@ -1,8 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> 
-
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+    
+    
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,7 +13,9 @@
 <script src="http://localhost:9000/mycgv_jsp/js/jquery-3.6.4.min.js"></script>
 <script src="http://localhost:9000/mycgv_jsp/js/mycgv_jsp_jquery.js"></script>
 <script src="http://localhost:9000/mycgv_jsp/js/am-pagination.js"></script>
-<script>
+<script src="http://localhost:9000/mycgv_jsp/js/mycgv_board_list.js"></script>
+
+ <script>
 	$(document).ready(function(){
 		var pager = jQuery('#ampaginationsm').pagination({
 		
@@ -33,52 +35,62 @@
 		
 		jQuery('#ampaginationsm').on('am.pagination.change',function(e){
 			   jQuery('.showlabelsm').text('The selected page no: '+e.page);
-	           $(location).attr('href', "http://localhost:9000/mycgv_jsp/admin_member_list.do?page="+e.page);         
+	           $(location).attr('href', "http://localhost:9000/mycgv_jsp/board_list_json.do?page="+e.page);         
 	    });
 		
  	});
-</script> 
+</script>  
+
 </head>
 <body>
 	<!-- header -->
 	<!-- <iframe src="http://localhost:9000/mycgv_jsp/header.jsp"
 			scrolling="no" width="100%" height="149px" frameborder=0></iframe> -->
-	<jsp:include page="../../header.jsp"></jsp:include>
+	<jsp:include page="../header.jsp"></jsp:include>
 	
 	<!-- content -->
 	<div class="content">
-		<section class="notice">
-			<h1 class="title">관리자 - 회원관리</h1>			
-			<table>
+		<section class="board">
+			<h1 class="title">게시판</h1>
+			<%-- <table class="board_list">
+				<tr>
+					<td colspan="5">
+						<a href="board_write.do">
+							<button type="button" class="btn_style2">글쓰기</button>
+						</a>
+					</td>
+				</tr>
 				<tr>
 					<th>번호</th>
-					<th>아이디</th>
-					<th>성명</th>
-					<th>가입일자</th>
-					<th>회원등급</th>
+					<th>제목</th>
+					<th>조회수</th>
+					<th>작성자</th>
+					<th>작성일자</th>
 				</tr>
-				<c:forEach var = "memberVo" items = "${list}">
+				<c:forEach var = "boardVo" items = "${list}">
 				<tr>
-					<td>${memberVo.rno}</td>
-					<td>${memberVo.id}</td>
-					<td>${memberVo.name}</td>
-					<td>${memberVo.mdate}</td>
-					<td>${memberVo.grade}</td>
-				</tr>	
+					<td>${boardVo.rno}</td>
+					<td><a href="board_content.do?bid=${boardVo.bid}">${boardVo.btitle}</a></td>
+					<td>${boardVo.bhits}</td>
+					<td>${boardVo.id}</td>
+					<td>${boardVo.bdate}</td>
+				</tr>
 				</c:forEach>
 				<tr>
 					<td colspan="5"><div id="ampaginationsm"></div></td>
 				</tr>
-			</table>
+			</table> --%>
 		</section>
 	</div>
 	
 	<!-- footer -->
 	<!-- <iframe src="http://localhost:9000/mycgv_jsp/footer.jsp"
 			scrolling="no" width="100%" height="500px" frameborder=0></iframe> -->	
-	<jsp:include page="../../footer.jsp"></jsp:include>
+	<jsp:include page="../footer.jsp"></jsp:include>
 </body>
 </html>
+
+
 
 
 
