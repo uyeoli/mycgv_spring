@@ -2,6 +2,7 @@ package com.mycgv_jsp.controller;
 
 import java.util.ArrayList;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -11,31 +12,15 @@ import org.springframework.web.servlet.ModelAndView;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.mycgv_jsp.dao.BoardDao;
+import com.mycgv_jsp.service.BoardService;
 import com.mycgv_jsp.vo.BoardVo;
 
 @Controller
 public class BoardController {
 	
-	/*
-	 * board_list.do - 게시글 전체 리스트
-	 */
-	/*
-	 * @RequestMapping(value = "/board_list.do" , method = RequestMethod.GET) 
-	 * public ModelAndView board_list() {
-	 * 
-	 * ModelAndView model = new ModelAndView(); 
-	 * //DB연동 후
-	 * BoardDao boardDao = new BoardDao(); 
-	 *  //게시글 전체리스트 가져오기 
-	 * ArrayList<BoardVo> list = boardDao.select();
-	 * 
-	 * model.addObject("list", list); 
-	 * model.setViewName("/board/board_list"); 
-	 * return model; 
-	 * }
-	 * 
-	 */
+	@Autowired
+	private BoardService boardService;
+
 	 //heder 게시판(json) 호출되는 주소
 	@RequestMapping(value="/board_list_json.do", method=RequestMethod.GET)
 	public String board_list_json() {
@@ -43,64 +28,64 @@ public class BoardController {
 	}
 	
 	
-	 	/**
-		 * board_list_json_data.do - ajax에서 호출되는 게시글 전체 리스트(JSON)
-		 * @return
-		 */
-		@RequestMapping(value="/board_list_json_data.do", method=RequestMethod.GET,
-							produces = "text/plain;charset=UTF-8")
-		@ResponseBody
-		public String board_list_json_data(String page) {
-			BoardDao boardDao = new BoardDao();
-			//페이징 처리 - startCount, endCount 구하기
-			int startCount = 0;
-			int endCount = 0;
-			int pageSize = 5;	//한페이지당 게시물 수
-			int reqPage = 1;	//요청페이지	
-			int pageCount = 1;	//전체 페이지 수
-			int dbCount = boardDao.totalRowCount();	//DB에서 가져온 전체 행수
-			
-			//총 페이지 수 계산
-			if(dbCount % pageSize == 0){
-				pageCount = dbCount/pageSize;
-			}else{
-				pageCount = dbCount/pageSize+1;
-			}
-
-			//요청 페이지 계산
-			if(page != null){
-				reqPage = Integer.parseInt(page);
-				startCount = (reqPage-1) * pageSize+1; 
-				endCount = reqPage *pageSize;
-			}else{
-				startCount = 1;
-				endCount = pageSize;
-			}
-			
-			ArrayList<BoardVo> list = boardDao.select(startCount, endCount);
-			//list 객체의 데이터를 JSON 형태로 생성
-			JsonObject jlist = new JsonObject();
-			JsonArray jarray = new JsonArray();
-			
-			for(BoardVo boardVo : list) {
-				JsonObject jobj = new JsonObject(); // {}
-				jobj.addProperty("rno", boardVo.getRno()); //{rno:1}
-				jobj.addProperty("btitle", boardVo.getBtitle()); // {rno:1, btitle:"df"}
-				jobj.addProperty("id", boardVo.getId());
-				jobj.addProperty("bhits", boardVo.getBhits());
-				jobj.addProperty("bdate", boardVo.getBdate());
-				jarray.add(jobj);
-			}
-			jlist.add("jlist", jarray);
-			jlist.addProperty("totals", dbCount);
-			jlist.addProperty("pageSize", pageSize);
-			jlist.addProperty("maxSize", pageCount);
-			jlist.addProperty("page", reqPage);
-			
-			return new Gson().toJson(jlist);
+ 	/**
+	 * board_list_json_data.do - ajax에서 호출되는 게시글 전체 리스트(JSON)
+	 * @return
+	 */
+	@RequestMapping(value="/board_list_json_data.do", method=RequestMethod.GET,
+						produces = "text/plain;charset=UTF-8")
+	@ResponseBody
+	public String board_list_json_data(String page) {
+		//BoardDao boardDao = new BoardDao();
+		//페이징 처리 - startCount, endCount 구하기
+		int startCount = 0;
+		int endCount = 0;
+		int pageSize = 5;	//한페이지당 게시물 수
+		int reqPage = 1;	//요청페이지	
+		int pageCount = 1;	//전체 페이지 수
+		int dbCount = boardService.getTotalRowCount();	//DB에서 가져온 전체 행수
+		
+		//총 페이지 수 계산
+		if(dbCount % pageSize == 0){
+			pageCount = dbCount/pageSize;
+		}else{
+			pageCount = dbCount/pageSize+1;
 		}
-			
-			
+
+		//요청 페이지 계산
+		if(page != null){
+			reqPage = Integer.parseInt(page);
+			startCount = (reqPage-1) * pageSize+1; 
+			endCount = reqPage *pageSize;
+		}else{
+			startCount = 1;
+			endCount = pageSize;
+		}
+		
+		ArrayList<BoardVo> list = boardService.getList(startCount, endCount);
+		//list 객체의 데이터를 JSON 형태로 생성
+		JsonObject jlist = new JsonObject();
+		JsonArray jarray = new JsonArray();
+		
+		for(BoardVo boardVo : list) {
+			JsonObject jobj = new JsonObject(); // {}
+			jobj.addProperty("rno", boardVo.getRno()); //{rno:1}
+			jobj.addProperty("btitle", boardVo.getBtitle()); // {rno:1, btitle:"df"}
+			jobj.addProperty("id", boardVo.getId());
+			jobj.addProperty("bhits", boardVo.getBhits());
+			jobj.addProperty("bdate", boardVo.getBdate());
+			jarray.add(jobj);
+		}
+		jlist.add("jlist", jarray);
+		jlist.addProperty("totals", dbCount);
+		jlist.addProperty("pageSize", pageSize);
+		jlist.addProperty("maxSize", pageCount);
+		jlist.addProperty("page", reqPage);
+		
+		return new Gson().toJson(jlist);
+	}
+		
+		
 //			model.addObject("list", list);
 //			model.addObject("totals", dbCount);
 //			model.addObject("pageSize", pageSize);
@@ -118,11 +103,11 @@ public class BoardController {
 	 @RequestMapping(value = "/board_content.do" , method = RequestMethod.GET) 
 	 public ModelAndView board_content(String bid) {
 		 ModelAndView model = new ModelAndView();
-		 BoardDao boardDao = new BoardDao();
-		 BoardVo boardVo = boardDao.select(bid);
+		 //BoardDao boardDao = new BoardDao();
+		 BoardVo boardVo = boardService.getContent(bid);
 		 if(boardVo != null) {
 			 //조회수 업데이트 - DB적용
-			 boardDao.updateHits(bid);
+			 boardService.getUpdateHits(bid);
 		 }
 		 
 		 model.addObject("bvo", boardVo);
@@ -130,54 +115,54 @@ public class BoardController {
 		 return model;
 	 }
 	 
-	 	/**
-		 * board_list.do - 게시글 전체 리스트 
-		 * @return
-		 */
-		@RequestMapping(value="/board_list.do", method=RequestMethod.GET)
-		public ModelAndView board_list(String page) {
-			ModelAndView model = new ModelAndView();		
-			BoardDao boardDao = new BoardDao();
-			
-			//페이징 처리 - startCount, endCount 구하기
-			int startCount = 0;
-			int endCount = 0;
-			int pageSize = 5;	//한페이지당 게시물 수
-			int reqPage = 1;	//요청페이지	
-			int pageCount = 1;	//전체 페이지 수
-			int dbCount = boardDao.totalRowCount();	//DB에서 가져온 전체 행수
-			
-			//총 페이지 수 계산
-			if(dbCount % pageSize == 0){
-				pageCount = dbCount/pageSize;
-			}else{
-				pageCount = dbCount/pageSize+1;
-			}
-
-			//요청 페이지 계산
-			if(page != null){
-				reqPage = Integer.parseInt(page);
-				startCount = (reqPage-1) * pageSize+1; 
-				endCount = reqPage *pageSize;
-			}else{
-				startCount = 1;
-				endCount = pageSize;
-			}
-			
-			ArrayList<BoardVo> list = boardDao.select(startCount, endCount);
+ 	/**
+	 * board_list.do - 게시글 전체 리스트 
+	 * @return
+	 */
+	@RequestMapping(value="/board_list.do", method=RequestMethod.GET)
+	public ModelAndView board_list(String page) {
+		ModelAndView model = new ModelAndView();		
+		//BoardDao boardDao = new BoardDao();
 		
-			model.addObject("list", list);
-			model.addObject("totals", dbCount);
-			model.addObject("pageSize", pageSize);
-			model.addObject("maxSize", pageCount);
-			model.addObject("page", reqPage);
-			
-			model.setViewName("/board/board_list");
-			
-			return model;
-		} 
-	 
-	 
+		//페이징 처리 - startCount, endCount 구하기
+		int startCount = 0;
+		int endCount = 0;
+		int pageSize = 5;	//한페이지당 게시물 수
+		int reqPage = 1;	//요청페이지	
+		int pageCount = 1;	//전체 페이지 수
+		int dbCount = boardService.getTotalRowCount();	//DB에서 가져온 전체 행수
+		
+		//총 페이지 수 계산
+		if(dbCount % pageSize == 0){
+			pageCount = dbCount/pageSize;
+		}else{
+			pageCount = dbCount/pageSize+1;
+		}
+
+		//요청 페이지 계산
+		if(page != null){
+			reqPage = Integer.parseInt(page);
+			startCount = (reqPage-1) * pageSize+1; 
+			endCount = reqPage *pageSize;
+		}else{
+			startCount = 1;
+			endCount = pageSize;
+		}
+		
+		ArrayList<BoardVo> list = boardService.getList(startCount, endCount);
+	
+		model.addObject("list", list);
+		model.addObject("totals", dbCount);
+		model.addObject("pageSize", pageSize);
+		model.addObject("maxSize", pageCount);
+		model.addObject("page", reqPage);
+		
+		model.setViewName("/board/board_list");
+		
+		return model;
+	} 
+ 
+ 
 	 /*
 	  * board_write.do - 게시글 글쓰기
 	  */
@@ -197,8 +182,8 @@ public class BoardController {
 		 //2. BoardVo 데이터를 Dao에 전송
 		 //3. mycgv_board 테이블에 insert
 		 String viewName = "";
-		 BoardDao boardDao = new BoardDao();
-		 int result = boardDao.insert(boardVo);
+		 //BoardDao boardDao = new BoardDao();
+		 int result = boardService.boardInsert(boardVo);
 		 if(result == 1) {
 			 //viewName = "/board/board_list";
 			 viewName = "redirect:/board_list.do"; //수정 후 수정된 리스트를 보여주는 페이지로 갈때 redirect 사용
@@ -215,8 +200,8 @@ public class BoardController {
 	 public ModelAndView board_update(String bid) {
 		 //수정폼은 상세보기 내용을 가져와서 폼에 추가하여 출력
 		 ModelAndView model = new ModelAndView();
-		 BoardDao boardDao = new BoardDao();
-		 BoardVo boardVo = boardDao.select(bid);
+		 //BoardDao boardDao = new BoardDao();
+		 BoardVo boardVo = boardService.boardSelect(bid);
 		 model.addObject("bvo", boardVo);
 		 model.setViewName("/board/board_update");
 		 return model;
@@ -228,8 +213,7 @@ public class BoardController {
 	 @RequestMapping(value = "/board_update_proc.do", method = RequestMethod.POST)
 	 public String board_update_proc(BoardVo boardVo) {
 		 String viewName = "";
-		 BoardDao boardDao = new BoardDao();
-		 int result = boardDao.update(boardVo);
+		 int result = boardService.boardUpdate(boardVo);
 		 if(result == 1) {
 			 viewName = "redirect:/board_list.do";
 		 } else {
@@ -256,8 +240,8 @@ public class BoardController {
 	 @RequestMapping(value = "/board_delete_proc.do", method = RequestMethod.POST)
 	 public String board_delete_proc(String bid) {
 		 String viewName = "";
-		 BoardDao boardDao = new BoardDao();
-		 int result = boardDao.delete(bid);
+		 //BoardDao boardDao = new BoardDao();
+		 int result = boardService.boardDelete(bid);
 		 if(result == 1) {
 			viewName = "redirect:/board_list.do";
 		 } else {
