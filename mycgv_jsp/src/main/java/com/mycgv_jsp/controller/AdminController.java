@@ -1,6 +1,7 @@
 package com.mycgv_jsp.controller;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,8 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.mycgv_jsp.dao.NoticeDao;
 import com.mycgv_jsp.service.MemberService;
+import com.mycgv_jsp.service.NoticeService;
+import com.mycgv_jsp.service.PageServiceImpl;
 import com.mycgv_jsp.vo.MemberVo;
 import com.mycgv_jsp.vo.NoticeVo;
 
@@ -17,8 +19,10 @@ import com.mycgv_jsp.vo.NoticeVo;
 public class AdminController {
 	@Autowired
 	private MemberService memberService;
-	
-	
+	@Autowired
+	private NoticeService noticeService;
+	@Autowired
+	private PageServiceImpl pageService;
 	/*
 	 * admin_notice.do - 공지사항
 	 */
@@ -33,40 +37,16 @@ public class AdminController {
 	@RequestMapping(value = "/admin_notice_list.do", method = RequestMethod.GET)
 	public ModelAndView admin_notice_list(String page) {
 		ModelAndView model = new ModelAndView();
-		NoticeDao noticeDao = new NoticeDao();
+		Map<String, Integer> param = pageService.getPageResult(page, "notice");
 		
-		//페이징 처리 - startCount, endCount 구하기
-		int startCount = 0;
-		int endCount = 0;
-		int pageSize = 5;	//한페이지당 게시물 수
-		int reqPage = 1;	//요청페이지	
-		int pageCount = 1;	//전체 페이지 수
-		int dbCount = noticeDao.totalRowCount();	//DB에서 가져온 전체 행수
 		
-		//총 페이지 수 계산
-		if(dbCount % pageSize == 0){
-			pageCount = dbCount/pageSize;
-		}else{
-			pageCount = dbCount/pageSize+1;
-		}
-
-		//요청 페이지 계산
-		if(page != null){
-			reqPage = Integer.parseInt(page);
-			startCount = (reqPage-1) * pageSize+1; 
-			endCount = reqPage *pageSize;
-		}else{
-			startCount = 1;
-			endCount = pageSize;
-		}
+		ArrayList<NoticeVo> list = noticeService.getList(param.get("startCount"), param.get("endCount"));
 		
-		ArrayList<NoticeVo> list = noticeDao.select(startCount, endCount);
-	
 		model.addObject("list", list);
-		model.addObject("totals", dbCount);
-		model.addObject("pageSize", pageSize);
-		model.addObject("maxSize", pageCount);
-		model.addObject("page", reqPage);
+		model.addObject("totals", param.get("dbCount"));
+		model.addObject("pageSize", param.get("pageSize"));
+		model.addObject("maxSize", param.get("maxSize"));
+		model.addObject("page", param.get("page"));
 		
 		model.setViewName("/admin/notice/admin_notice_list");
 		
@@ -88,8 +68,7 @@ public class AdminController {
 	@RequestMapping(value = "/admin_notice_write_proc.do", method = RequestMethod.POST)
 	public String admin_notice_write_proc(NoticeVo noticeVo) {
 		String viewName = "";
-		NoticeDao noticeDao = new NoticeDao();
-		int result = noticeDao.insert(noticeVo);
+		int result = noticeService.getInsert(noticeVo);
 		if (result == 1) {
 			// viewName = "/admin/notice/admin_notice_list";
 			viewName = "redirect:/admin_notice_list.do"; // 수정 후 수정된 리스트를 보여주는 페이지로 갈때 redirect 사용
@@ -105,8 +84,7 @@ public class AdminController {
 	@RequestMapping(value = "/admin_notice_content.do", method = RequestMethod.GET)
 	public ModelAndView admin_notice_content(String nid) {
 		ModelAndView model = new ModelAndView();
-		NoticeDao noticeDao = new NoticeDao();
-		NoticeVo noticeVo = noticeDao.select(nid);
+		NoticeVo noticeVo = noticeService.getSelect(nid);
 
 
 		model.addObject("nvo", noticeVo);
@@ -121,8 +99,7 @@ public class AdminController {
 	public ModelAndView admin_notice_update(String nid) {
 		// 수정폼은 상세보기 내용을 가져와서 폼에 추가하여 출력
 		ModelAndView model = new ModelAndView();
-		NoticeDao noticeDao = new NoticeDao();
-		NoticeVo noticeVo = noticeDao.select(nid);
+		NoticeVo noticeVo = noticeService.getSelect(nid);
 		model.addObject("nvo", noticeVo);
 		model.setViewName("/admin/notice/admin_notice_update");
 		return model;
@@ -134,8 +111,7 @@ public class AdminController {
 	 @RequestMapping(value = "/admin_notice_update_proc.do" , method =RequestMethod.POST)
 	 public String admin_notice_update_proc(NoticeVo noticeVo) { 
 		 String viewName = "";
-		 NoticeDao noticeDao = new NoticeDao(); 
-		 int result = noticeDao.update(noticeVo);
+		 int result = noticeService.getUpdate(noticeVo);
 		 if(result == 1) {
 			 viewName = "redirect:/admin_notice_list.do";
 		 } else {
@@ -162,8 +138,7 @@ public class AdminController {
 	 @RequestMapping(value = "/admin_notice_delete_proc.do", method = RequestMethod.POST)
 	 public String admin_notice_delete_proc(String nid) {
 		 String viewName = "";
-		 NoticeDao noticeDao = new NoticeDao();
-		 int result = noticeDao.delete(nid);
+		 int result = noticeService.getDelete(nid);
 		 if(result == 1) {
 			 viewName = "redirect:/admin_notice_list.do";
 		 } else {
@@ -186,39 +161,14 @@ public class AdminController {
 	 @RequestMapping(value = "/admin_member_list.do" , method =RequestMethod.GET)
 	 public ModelAndView admin_member_list(String page) { 
 		 ModelAndView model = new ModelAndView();
-
-		 //MemberDao memberDao = new MemberDao(); 
-		//페이징 처리 - startCount, endCount 구하기
-			int startCount = 0;
-			int endCount = 0;
-			int pageSize = 5;	//한페이지당 게시물 수
-			int reqPage = 1;	//요청페이지	
-			int pageCount = 1;	//전체 페이지 수
-			int dbCount = memberService.getTotalRowCount();	//DB에서 가져온 전체 행수
+		 Map<String, Integer> param = pageService.getPageResult(page, "member");
 			
-			//총 페이지 수 계산
-			if(dbCount % pageSize == 0){
-				pageCount = dbCount/pageSize;
-			}else{
-				pageCount = dbCount/pageSize+1;
-			}
-
-			//요청 페이지 계산
-			if(page != null){
-				reqPage = Integer.parseInt(page);
-				startCount = (reqPage-1) * pageSize+1; 
-				endCount = reqPage *pageSize;
-			}else{
-				startCount = 1;
-				endCount = pageSize;
-			}
-			
-		ArrayList<MemberVo> list = memberService.getList(startCount, endCount);
+		ArrayList<MemberVo> list = memberService.getList(param.get("startCount"), param.get("endCount"));
 		model.addObject("list", list);
-		model.addObject("totals", dbCount);
-		model.addObject("pageSize", pageSize);
-		model.addObject("maxSize", pageCount);
-		model.addObject("page", reqPage);
+		model.addObject("totals", param.get("dbCount"));
+		model.addObject("pageSize", param.get("pageSize"));
+		model.addObject("maxSize", param.get("maxSize"));
+		model.addObject("page", param.get("page"));
 		model.setViewName("/admin/member/admin_member_list");
 		return model; 
 	 	}

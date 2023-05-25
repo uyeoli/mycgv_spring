@@ -19,8 +19,6 @@
 	</script>
 </head>
 <body>
-	<h1>login--->${login_result}</h1>
-
 	<jsp:include page="header.jsp"></jsp:include>	
 		
 	<!-- content -->	

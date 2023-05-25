@@ -5,12 +5,11 @@ import java.util.ArrayList;
 import com.mycgv_jsp.vo.BoardVo;
 
 public interface BoardService {
-	public ArrayList<BoardVo> getList(int startCount, int endCount);
-	public int getTotalRowCount();
-	public BoardVo getContent(String bid);
-	public void getUpdateHits(String bid);
-	public int boardInsert(BoardVo boardVo);
-	public BoardVo boardSelect(String bid);
-	public int boardUpdate(BoardVo boardVo);
-	public int boardDelete(String bid);
+	ArrayList<BoardVo> getList(int startCount, int endCount);
+	int getTotalRowCount();
+	void getUpdateHits(String bid);
+	int getInsert(BoardVo boardVo);
+	BoardVo getSelect(String bid);
+	int getUpdate(BoardVo boardVo);
+	int getDelete(String bid);
 }

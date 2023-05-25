@@ -22,10 +22,6 @@ public class BoardServiceImpl implements BoardService{
 		return boardDao.totalRowCount();
 	}
 	
-	@Override
-	public BoardVo getContent(String bid) {
-		return boardDao.select(bid);
-	}
 	
 	@Override
 	public void getUpdateHits(String bid) {
@@ -33,22 +29,22 @@ public class BoardServiceImpl implements BoardService{
 	}
 	
 	@Override
-	public int boardInsert(BoardVo boardVo) {
+	public int getInsert(BoardVo boardVo) {
 		return boardDao.insert(boardVo);
 	}
 	
 	@Override
-	public BoardVo boardSelect(String bid) {
+	public BoardVo getSelect(String bid) {
 		return boardDao.select(bid);
 	}
 	
 	@Override
-	public int boardUpdate(BoardVo boardVo) {
+	public int getUpdate(BoardVo boardVo) {
 		return boardDao.update(boardVo);
 	}
 	
 	@Override
-	public int boardDelete(String bid) {
+	public int getDelete(String bid) {
 		return boardDao.delete(bid);
 	}
 	
