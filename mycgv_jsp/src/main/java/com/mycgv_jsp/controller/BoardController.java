@@ -1,7 +1,11 @@
 package com.mycgv_jsp.controller;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -124,17 +128,42 @@ public class BoardController {
 	 /*
 	  * board_write_proc.do - 게시글 글쓰기 처리
 	  */
-	 
 	 @RequestMapping(value = "/board_write_proc.do" , method = RequestMethod.POST) 
-	 public String board_write_proc(BoardVo boardVo) {
+	 public String board_write_proc(BoardVo boardVo, HttpServletRequest request) throws Exception {
 		 //1. 폼에서 넘어오는 데이터 BoardVo에 담기
 		 //2. BoardVo 데이터를 Dao에 전송
 		 //3. mycgv_board 테이블에 insert
 		 String viewName = "";
+		 
+		 //bfile, bsfile 파일명 생성
+		 String root_path = request.getSession().getServletContext().getRealPath("/"); // 파일의 저장위치
+		 String attach_path = "\\resources\\upload\\";
+		 
+		 if(boardVo.getFile1().getOriginalFilename() != null && !boardVo.getFile1().getOriginalFilename().equals("")) { // 선택한 파일이 존재하면
+			 
+			 //BSFILE 파일 중복 처리
+			 UUID uuid = UUID.randomUUID();
+			 String bfile = boardVo.getFile1().getOriginalFilename();
+			 String bsfile = uuid + "_" + bfile;
+			 System.out.println(root_path + attach_path);
+			 System.out.println(bfile);
+			 System.out.println(bsfile);
+			 
+			 boardVo.setBfile(bfile);
+			 boardVo.setBsfile(bsfile);
+		 } else {
+			 System.out.println("파일 없음");
+		 }
+		 
+		 
 		 //BoardDao boardDao = new BoardDao();
 		 int result = boardService.getInsert(boardVo);
 		 if(result == 1) {
 			 //viewName = "/board/board_list";
+			 
+			 //파일이 존재하면 서버에 저장
+			 File saveFile = new File(root_path + attach_path + boardVo.getBsfile());
+			 boardVo.getFile1().transferTo(saveFile);
 			 viewName = "redirect:/board_list.do"; //수정 후 수정된 리스트를 보여주는 페이지로 갈때 redirect 사용
 		 } else {
 			 //에러 페이지 호출

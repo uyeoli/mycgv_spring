@@ -2,6 +2,7 @@ package com.mycgv_jsp.service;
 
 import java.util.ArrayList;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mycgv_jsp.dao.NoticeDao;
@@ -9,7 +10,10 @@ import com.mycgv_jsp.vo.NoticeVo;
 
 @Service
 public class NoticeServiceImpl implements NoticeService{
-	NoticeDao noticeDao = new NoticeDao();
+	//NoticeDao noticeDao = new NoticeDao();
+	
+	@Autowired
+	private NoticeDao noticeDao;
 	
 	@Override
 	public int getTotalRowCount() {
