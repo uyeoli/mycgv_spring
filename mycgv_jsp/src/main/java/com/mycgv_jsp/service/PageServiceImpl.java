@@ -4,17 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.mycgv_jsp.dao.PageDao;
 
+@Service("pageService")
 public class PageServiceImpl {
 	
-//	@Autowired
-//	private NoticeService noticeService;
-//	@Autowired
-//	private MemberService memberService;
-//	@Autowired
-//	private BoardService boardService;
 	@Autowired
 	private PageDao pageDao;
 	

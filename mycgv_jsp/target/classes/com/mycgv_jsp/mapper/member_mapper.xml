@@ -5,8 +5,8 @@
     
 <mapper namespace = "mapper.member">
 
-	<select id = "login" parameterType = "com.mycgv_jsp.vo.MemberVo" resultType = "int">
-		select count(*) from mycgv_member where id=#{id} and pass=#{pass}
+	<select id = "login" parameterType = "com.mycgv_jsp.vo.MemberVo" resultType = "com.mycgv_jsp.vo.SessionVo">
+		select count(*) loginresult, name, id from mycgv_member where id = #{id} and pass = #{pass} group by name, id
 	</select>
 	
 	<insert id = "join" parameterType = "com.mycgv_jsp.vo.MemberVo">
@@ -20,5 +20,9 @@
 				from (select rownum rno, id, name, to_char(mdate, 'yyyy-mm-dd') mdate, grade
 					from (select id, name, mdate, grade from mycgv_member order by mdate desc)) 
 						where rno between #{start} and #{end}
+	</select>
+	
+	<select id = "idCheck" parameterType = "String" resultType = "int">
+		select count(*) from mycgv_member where id = #{id}
 	</select>
 </mapper>

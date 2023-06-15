@@ -1,7 +1,10 @@
 package com.mycgv_jsp.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.mycgv_jsp.service.FileServiceImpl;
 import com.mycgv_jsp.service.MemberService;
 import com.mycgv_jsp.service.NoticeService;
 import com.mycgv_jsp.service.PageServiceImpl;
@@ -23,6 +27,10 @@ public class AdminController {
 	private NoticeService noticeService;
 	@Autowired
 	private PageServiceImpl pageService;
+	@Autowired
+	private FileServiceImpl fileService;
+	
+	
 	/*
 	 * admin_notice.do - 공지사항
 	 */
@@ -66,11 +74,16 @@ public class AdminController {
 	 */
 
 	@RequestMapping(value = "/admin_notice_write_proc.do", method = RequestMethod.POST)
-	public String admin_notice_write_proc(NoticeVo noticeVo) {
+	public String admin_notice_write_proc(NoticeVo noticeVo, HttpServletRequest request) throws IOException{
 		String viewName = "";
-		int result = noticeService.getInsert(noticeVo);
+		
+		//멀티파일 체크
+		int result = noticeService.getInsert(fileService.multiFileCheck(noticeVo));
 		if (result == 1) {
 			// viewName = "/admin/notice/admin_notice_list";
+			if(noticeVo.getFiles()[0].getOriginalFilename() != null) {
+				fileService.multiFileSave(noticeVo, request);
+			}
 			viewName = "redirect:/admin_notice_list.do"; // 수정 후 수정된 리스트를 보여주는 페이지로 갈때 redirect 사용
 		} else {
 			// 에러 페이지 호출
@@ -150,13 +163,6 @@ public class AdminController {
 	 /*
 	  * admin_member_list.do - 회원 전체 리스트
 	  */
-		/*
-		 * @RequestMapping(value = "/admin_member_list.do" , method =RequestMethod.GET)
-		 * public ModelAndView admin_member_list() { ModelAndView model = new
-		 * ModelAndView(); MemberDao memberDao = new MemberDao(); ArrayList<MemberVo>
-		 * list = memberDao.select(); model.addObject("list", list);
-		 * model.setViewName("/admin/member/admin_member_list"); return model; }
-		 */
 	 
 	 @RequestMapping(value = "/admin_member_list.do" , method =RequestMethod.GET)
 	 public ModelAndView admin_member_list(String page) { 

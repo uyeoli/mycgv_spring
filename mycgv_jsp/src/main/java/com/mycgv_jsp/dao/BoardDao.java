@@ -11,40 +11,20 @@ import org.springframework.stereotype.Repository;
 
 import com.mycgv_jsp.vo.BoardVo;
 @Repository
-public class BoardDao extends DBConn{
+public class BoardDao implements MycgvDao{
 	
 	@Autowired
 	private SqlSessionTemplate sqlSession;
-	
-	
-	/* 전체 카운트 가져오기*/
-	public int totalRowCount() {
-			int count = 0;
-			String sql = "select count(*) from mycgv_board";
-			getPreparedStatement(sql);
-			
-			try {
-				rs = pstmt.executeQuery();
-				while(rs.next()) {				
-					count = rs.getInt(1);
-				}			
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			return count;		
-		}	
 
 	/**
 	 * 페이징 처리 - startCount , endCount
 	 */
-	public ArrayList<BoardVo> select(int startCount, int endCount) {
+	public List<Object> select(int startCount, int endCount) {
 		Map<String, Integer> param = new HashMap<String, Integer>();
 		param.put("start", startCount);
 		param.put("end", endCount);
-		List<BoardVo> list = sqlSession.selectList("mapper.board.list", param);
-		return (ArrayList<BoardVo>)list;
+		//List<Object> list = sqlSession.selectList("mapper.board.list", param);
+		return sqlSession.selectList("mapper.board.list", param);
 		
 //		ArrayList<BoardVo> list = new ArrayList<BoardVo>();
 //		String sql = "SELECT RNO, BID, BTITLE, BCONTENT, BHITS, ID, BDATE" + 
@@ -181,27 +161,13 @@ public class BoardDao extends DBConn{
 	/*
 	 * insert - 게시글 등록
 	 * */
-	public int insert(BoardVo boardVo) {
+	@Override
+	public int insert(Object boardVo) {
 		return sqlSession.insert("mapper.board.insert", boardVo);
-//		int result = 0;
-//		String sql = "insert into mycgv_board(bid, btitle, bcontent, bhits, id, bdate, bfile, bsfile)"
-//				+ " values('b_'||LTRIM(to_char(sequ_mycgv_board.nextval, '0000')) , ?,?,0,?,sysdate,?,?)";
-//		getPreparedStatement(sql);
-//		
-//		try {
-//			pstmt.setString(1, boardVo.getBtitle());
-//			pstmt.setString(2, boardVo.getBcontent());
-//			pstmt.setString(3, boardVo.getId());
-//			pstmt.setString(4, boardVo.getBfile());
-//			pstmt.setString(5, boardVo.getBsfile());
-//			
-//			result = pstmt.executeUpdate();
-//			
-//		}catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return result;
 	}
+//	public int insert(BoardVo boardVo) {
+//		return sqlSession.insert("mapper.board.insert", boardVo);
+//	}
 	
 	/*
 	 * update - 조회수 카운트

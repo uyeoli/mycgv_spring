@@ -1,9 +1,8 @@
 package com.mycgv_jsp.controller;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,6 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mycgv_jsp.service.BoardService;
+import com.mycgv_jsp.service.FileServiceImpl;
 import com.mycgv_jsp.service.PageServiceImpl;
 import com.mycgv_jsp.vo.BoardVo;
 
@@ -28,7 +28,8 @@ public class BoardController {
 	private BoardService boardService;
 	@Autowired
 	private PageServiceImpl pageService;
-	
+	@Autowired
+	private FileServiceImpl fileService;
 	
 	 //heder 게시판(json) 호출되는 주소
 	@RequestMapping(value="/board_list_json.do", method=RequestMethod.GET)
@@ -135,35 +136,15 @@ public class BoardController {
 		 //3. mycgv_board 테이블에 insert
 		 String viewName = "";
 		 
-		 //bfile, bsfile 파일명 생성
-		 String root_path = request.getSession().getServletContext().getRealPath("/"); // 파일의 저장위치
-		 String attach_path = "\\resources\\upload\\";
-		 
-		 if(boardVo.getFile1().getOriginalFilename() != null && !boardVo.getFile1().getOriginalFilename().equals("")) { // 선택한 파일이 존재하면
-			 
-			 //BSFILE 파일 중복 처리
-			 UUID uuid = UUID.randomUUID();
-			 String bfile = boardVo.getFile1().getOriginalFilename();
-			 String bsfile = uuid + "_" + bfile;
-			 System.out.println(root_path + attach_path);
-			 System.out.println(bfile);
-			 System.out.println(bsfile);
-			 
-			 boardVo.setBfile(bfile);
-			 boardVo.setBsfile(bsfile);
-		 } else {
-			 System.out.println("파일 없음");
-		 }
-		 
-		 
+		 //BoardVo boardVo2 = fileService.fileCheck(boardVo);
 		 //BoardDao boardDao = new BoardDao();
-		 int result = boardService.getInsert(boardVo);
+		 int result = boardService.getInsert(fileService.fileCheck(boardVo));
 		 if(result == 1) {
-			 //viewName = "/board/board_list";
 			 
-			 //파일이 존재하면 서버에 저장
-			 File saveFile = new File(root_path + attach_path + boardVo.getBsfile());
-			 boardVo.getFile1().transferTo(saveFile);
+			 if(boardVo.getBfile() != null && boardVo.getBfile().equals("")) {
+				 fileService.fileSave(boardVo, request);
+			 }
+			 
 			 viewName = "redirect:/board_list.do"; //수정 후 수정된 리스트를 보여주는 페이지로 갈때 redirect 사용
 		 } else {
 			 //에러 페이지 호출
@@ -189,10 +170,17 @@ public class BoardController {
 	  * board_update_proc.do - 게시글 수정하기 처리
 	  */
 	 @RequestMapping(value = "/board_update_proc.do", method = RequestMethod.POST)
-	 public String board_update_proc(BoardVo boardVo) {
+	 public String board_update_proc(BoardVo boardVo, HttpServletRequest request) throws IOException{
 		 String viewName = "";
-		 int result = boardService.getUpdate(boardVo);
+		 
+		 String oldFileName = boardVo.getBsfile(); //새로운 파일 업데이트 시 기존파일 삭제
+		 int result = boardService.getUpdate(fileService.fileCheck(boardVo));
 		 if(result == 1) {
+			 if(boardVo.getBfile() != null && boardVo.getBfile().equals("")) {
+				 fileService.fileSave(boardVo, request); // 새로운 파일 저장
+				 // 기존파일 삭제
+				 fileService.fileDelete(boardVo, request, oldFileName);
+			 }
 			 viewName = "redirect:/board_list.do";
 		 } else {
 			 //에러페이지 호출
@@ -204,10 +192,11 @@ public class BoardController {
 	  * board_delete.do - 게시글 삭제 폼
 	  */
 	 @RequestMapping(value = "/board_delete.do", method = RequestMethod.GET)
-	 public ModelAndView board_delete(String bid) {
+	 public ModelAndView board_delete(String bid, String bsfile) {
 		 //수정폼은 상세보기 내용을 가져와서 폼에 추가하여 출력
 		 ModelAndView model = new ModelAndView();
 		 model.addObject("bid", bid);
+		 model.addObject("bsfile", bsfile);
 		 model.setViewName("/board/board_delete");
 		 return model;
 	 }
@@ -216,11 +205,15 @@ public class BoardController {
 	  * board_delete_proc.do - 게시글 삭제하기 처리
 	  */
 	 @RequestMapping(value = "/board_delete_proc.do", method = RequestMethod.POST)
-	 public String board_delete_proc(String bid) {
+	 public String board_delete_proc(String bid, String bsfile, HttpServletRequest request) throws IOException{
 		 String viewName = "";
 		 //BoardDao boardDao = new BoardDao();
 		 int result = boardService.getDelete(bid);
 		 if(result == 1) {
+			 if(bsfile != null) {
+				 // 기존파일 삭제
+				 fileService.fileDelete(request, bsfile);
+			 }
 			viewName = "redirect:/board_list.do";
 		 } else {
 			 //오류 페이지 호출

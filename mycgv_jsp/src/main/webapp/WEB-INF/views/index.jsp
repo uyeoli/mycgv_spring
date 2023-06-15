@@ -13,8 +13,12 @@
 	<link rel="stylesheet" href="http://localhost:9000/mycgv_jsp/css/mycgv_jsp.css">
 	<script>
 		let login_result = "${login_result}";
+		let logout_result = "${logout_result}";
 		if(login_result == "ok") {
 			alert("로그인 성공");
+		}
+		if(logout_result == "ok") {
+			alert("로그아웃 성공");
 		}
 	</script>
 </head>

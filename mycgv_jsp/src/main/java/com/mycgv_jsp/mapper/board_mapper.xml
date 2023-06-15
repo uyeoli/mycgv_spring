@@ -23,7 +23,11 @@
 	</select>
 	
 	<update id = "update" parameterType = "com.mycgv_jsp.vo.BoardVo">
-		UPDATE MYCGV_BOARD SET BTITLE = #{btitle}, BCONTENT = #{bcontent} WHERE BID = #{bid}
+		UPDATE MYCGV_BOARD SET BTITLE = #{btitle}, BCONTENT = #{bcontent}
+<!-- 		<if test = 'bfile != null'> -->
+			, bfile = #{bfile}, bsfile = #{bsfile}
+		<!-- </if> -->
+		 WHERE BID = #{bid}
 	</update>
 	
 	<delete id = "delete" parameterType = "String">
